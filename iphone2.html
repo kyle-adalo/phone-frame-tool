@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>iPhone 6.7" (1284×2778) Mobile Frame</title>
+<style>
+  :root {
+    --w: 428; /* iPhone Pro Max CSS pixels width */
+    --h: 926; /* iPhone Pro Max CSS pixels height */
+    --radius: 44px; /* visual corner radius of the device */
+    --chrome: 16px; /* outer padding around device */
+    --bg: #0b0b10;
+    --bezel: #0f1014;
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: #ffffff;
+    color: #333333;
+    font: 14px/1.25 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .toolbar {
+    position: fixed;
+    inset: 12px 12px auto 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 14px;
+    z-index: 10;
+  }
+  .toolbar input[type="text"] {
+    width: min(54vw, 680px);
+    max-width: 80vw;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    outline: none;
+  }
+  .btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.8);
+    color: #333;
+    cursor: pointer;
+    user-select: none;
+  }
+  .btn:active { transform: translateY(1px); }
+  .stat {
+    opacity: .8;
+    padding: 0 4px;
+    font-size: 12px;
+  }
+
+  .stage {
+    position: fixed;
+    inset: 0;
+    overflow: auto;
+    padding: 20px;
+    background: #ffffff;
+  }
+
+  .device-wrap {
+    position: absolute;
+    top: 10%;
+    left: 40%;
+    transform: translate(-50%, -50%);
+    margin-top: 10px;
+    padding: var(--chrome);
+    background: linear-gradient(180deg, #0e0f14 0%, #090a0f 100%);
+    border-radius: calc(var(--radius) + var(--chrome));
+    box-shadow:
+      0 40px 80px rgba(0,0,0,0.55),
+      0 6px 18px rgba(0,0,0,0.35),
+      inset 0 0 0 1px rgba(255,255,255,0.08);
+    transform-origin: top center;
+  }
+
+  .device {
+    width: calc(var(--w)*1px);
+    height: calc(var(--h)*1px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .screen {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .mobile-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .screen iframe {
+    width: 430px;
+    height: 928px;
+    border: 0;
+    display: block;
+    background: #111;
+    transform-origin: top left;
+    transform: scale(1);
+    position: absolute;
+    top: -1px;
+    left: -1px;
+  }
+
+  /* Dynamic Island */
+  .cutout {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 37px;
+    background: #000;
+    border-radius: 19px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.05),
+      0 4px 20px rgba(0,0,0,0.6);
+    opacity: 0.95;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .cutout.hidden { display: none; }
+
+  /* Subtle pixel grid overlay (toggleable) */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 10px 10px;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    display: none;
+  }
+  .grid.show { display: block; }
+
+  .status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 47px;
+    background: transparent;
+    z-index: 5;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <select id="deviceSelect" class="btn" style="padding: 10px 12px; min-width: 200px;">
+      <option value="428,926,44,iPhone 6.7 Pro Max">iPhone 6.7" Pro Max (428×926)</option>
+      <option value="390,844,44,iPhone 6.1">iPhone 6.1" (390×844)</option>
+      <option value="375,812,36,iPhone 5.8">iPhone 5.8" (375×812)</option>
+      <option value="414,896,36,iPhone 6.5">iPhone 6.5" (414×896)</option>
+      <option value="375,667,12,iPhone 4.7">iPhone 4.7" (375×667)</option>
+      <option value="320,568,12,iPhone 4">iPhone 4" (320×568)</option>
+      <option value="390,844,44,iPhone 12 mini">iPhone 12 mini (390×844)</option>
+      <option value="428,926,44,iPhone 14 Pro Max">iPhone 14 Pro Max (428×926)</option>
+      <option value="393,852,44,iPhone 15 Pro">iPhone 15 Pro (393×852)</option>
+      <option value="430,932,44,iPhone 15 Pro Max">iPhone 15 Pro Max (430×932)</option>
+      <option value="412,915,28,Samsung Galaxy S22">Samsung Galaxy S22 (412×915)</option>
+      <option value="412,869,28,Samsung Galaxy S21">Samsung Galaxy S21 (412×869)</option>
+      <option value="360,800,24,Samsung Galaxy A52">Samsung Galaxy A52 (360×800)</option>
+      <option value="393,851,28,Google Pixel 6">Google Pixel 6 (393×851)</option>
+      <option value="412,892,28,Google Pixel 5">Google Pixel 5 (412×892)</option>
+      <option value="411,731,28,OnePlus 9">OnePlus 9 (411×731)</option>
+    </select>
+    <input id="url" type="text" placeholder="Enter a URL (https://…)" value="https://amanda-burnss-team-1.adalo.com/mynavy-app/" />
+    <button class="btn" id="loadBtn">Load</button>
+    <button class="btn" id="fitBtn">Fit</button>
+    <button class="btn" id="oneBtn">1:1</button>
+    <button class="btn" id="downloadBtn">Save PNG</button>
+    <span class="stat" id="info"></span>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="device-wrap" id="wrap">
+      <div class="device" id="device">
+        <div class="screen">
+          <div class="mobile-container">
+            <iframe id="frame" src="https://amanda-burnss-team-1.adalo.com/mynavy-app/" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+        <div class="status-bar"></div>
+        <div class="grid" id="grid"></div>
+        <div class="cutout" id="cutout" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const W = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w'), 10);
+  const H = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--h'), 10);
+
+  const wrap = document.getElementById('wrap');
+  const device = document.getElementById('device');
+  const frame = document.getElementById('frame');
+  const url = document.getElementById('url');
+  const info = document.getElementById('info');
+  const cutout = document.getElementById('cutout');
+  const grid = document.getElementById('grid');
+  const deviceSelect = document.getElementById('deviceSelect');
+
+  const fitBtn = document.getElementById('fitBtn');
+  const oneBtn = document.getElementById('oneBtn');
+  const loadBtn = document.getElementById('loadBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  let mode = 'fit'; // 'fit' or 'one'
+  let currentDevice = { w: W, h: H, radius: 44, name: 'iPhone 6.7 Pro Max' };
+
+  function updateDevice() {
+    const selected = deviceSelect.value.split(',');
+    const w = parseInt(selected[0]);
+    const h = parseInt(selected[1]);
+    const radius = parseInt(selected[2]);
+    const name = selected[3];
+    
+    currentDevice = { w, h, radius, name };
+    
+    // Update CSS variables
+    document.documentElement.style.setProperty('--w', w);
+    document.documentElement.style.setProperty('--h', h);
+    document.documentElement.style.setProperty('--radius', radius + 'px');
+    
+    // Update device dimensions
+    device.style.width = w + 'px';
+    device.style.height = h + 'px';
+    
+    // Update iframe dimensions for mobile view
+    setMobileView();
+    
+    // Hide cutout for non-iPhone devices or older iPhones
+    if (name.includes('Samsung') || name.includes('Google') || name.includes('OnePlus') || name.includes('iPhone 4')) {
+      cutout.style.display = 'none';
+    } else {
+      cutout.style.display = 'block';
+    }
+    
+    applyScale();
+  }
+
+  async function downloadScreenshot() {
+    try {
+      downloadBtn.textContent = 'Loading...';
+      downloadBtn.disabled = true;
+
+      // Get the phone's position and dimensions
+      const deviceRect = device.getBoundingClientRect();
+      const phoneArea = {
+        left: Math.round(deviceRect.left + window.scrollX),
+        top: Math.round(deviceRect.top + window.scrollY),
+        width: Math.round(deviceRect.width),
+        height: Math.round(deviceRect.height)
+      };
+
+      console.log('Phone area calculated:', phoneArea);
+
+      // Check if extension is available
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        // Try to use the extension
+        try {
+          const response = await new Promise((resolve, reject) => {
+            chrome.runtime.sendMessage('', { // Empty extension ID means any extension
+              action: 'captureSpecificArea',
+              area: phoneArea,
+              targetDimensions: {
+                width: currentDevice.w,
+                height: currentDevice.h,
+                deviceName: currentDevice.name
+              },
+              pageInfo: {
+                url: window.location.href,
+                title: document.title
+              }
+            }, (response) => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else {
+                resolve(response);
+              }
+            });
+          });
+
+          if (response && response.success) {
+            downloadBtn.textContent = 'Save PNG';
+            downloadBtn.disabled = false;
+            alert('Screenshot captured by extension!');
+            return;
+          }
+        } catch (extensionError) {
+          console.log('Extension not available, trying fallback:', extensionError);
+        }
+      }
+
+      // Fallback to original html2canvas method
+      await fallbackScreenshot();
+
+    } catch (error) {
+      console.error('Screenshot failed:', error);
+      downloadBtn.textContent = 'Save PNG';
+      downloadBtn.disabled = false;
+      alert('Screenshot failed. Try using Chrome DevTools: F12 → Ctrl+Shift+P → "Capture full size screenshot"');
+    }
+  }
+
+  async function fallbackScreenshot() {
+    // Import html2canvas if not already loaded
+    if (!window.html2canvas) {
+      console.log('Loading html2canvas...');
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+      
+      await new Promise((resolve, reject) => {
+        script.onload = () => {
+          console.log('html2canvas loaded successfully');
+          resolve();
+        };
+        script.onerror = () => {
+          reject(new Error('Failed to load screenshot library'));
+        };
+        setTimeout(() => reject(new Error('Timeout loading screenshot library')), 10000);
+      });
+    }
+
+    console.log('Starting fallback screenshot...');
+
+    // Hide toolbar
+    const toolbar = document.querySelector('.toolbar');
+    const originalToolbarDisplay = toolbar.style.display;
+    
+    toolbar.style.display = 'none';
+
+    // Set device to 1:1 scale
+    const originalTransform = wrap.style.transform;
+    wrap.style.transform = 'scale(1)';
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Try to capture with iframe content included
+    console.log('Capturing screenshot with iframe content...');
+    const canvas = await window.html2canvas(wrap, {
+      backgroundColor: '#ffffff',
+      scale: 1,
+      useCORS: true,
+      allowTaint: true,
+      foreignObjectRendering: true,
+      ignoreElements: function(element) {
+        return false;
+      },
+      onclone: function(clonedDoc) {
+        const clonedIframe = clonedDoc.querySelector('#frame');
+        if (clonedIframe) {
+          try {
+            const iframeDoc = document.querySelector('#frame').contentDocument;
+            if (iframeDoc) {
+              const replacement = clonedDoc.createElement('div');
+              replacement.innerHTML = iframeDoc.body.innerHTML;
+              replacement.style.cssText = clonedIframe.style.cssText;
+              clonedIframe.parentNode.replaceChild(replacement, clonedIframe);
+            }
+          } catch (e) {
+            console.warn('Cannot access iframe content:', e);
+            const placeholder = clonedDoc.createElement('div');
+            placeholder.style.cssText = clonedIframe.style.cssText;
+            placeholder.style.background = '#f0f0f0';
+            placeholder.style.display = 'flex';
+            placeholder.style.alignItems = 'center';
+            placeholder.style.justifyContent = 'center';
+            placeholder.innerHTML = '<div style="color: #666; text-align: center; font-family: system-ui;">Web App Content<br><small>Use extension or DevTools<br>for complete capture</small></div>';
+            clonedIframe.parentNode.replaceChild(placeholder, clonedIframe);
+          }
+        }
+      },
+      scrollX: 0,
+      scrollY: 0,
+      width: wrap.offsetWidth,
+      height: wrap.offsetHeight,
+      logging: false
+    });
+
+    console.log('Screenshot captured, creating download...');
+
+    // Restore original styles
+    toolbar.style.display = originalToolbarDisplay;
+    wrap.style.transform = originalTransform;
+
+    // Create download link
+    const link = document.createElement('a');
+    const deviceName = currentDevice.name.replace(/[^a-zA-Z0-9]/g, '_');
+    link.download = `${deviceName}_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png', 0.9);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    downloadBtn.textContent = 'Save PNG';
+    downloadBtn.disabled = false;
+    
+    alert('Screenshot saved! Note: For best results with PWA content, install the App Store Screenshot extension or use Chrome DevTools.');
+  }
+
+  function applyScale() {
+    if (mode === 'fit') {
+      const s = scaleToFit();
+      wrap.style.transform = `scale(${s})`;
+      info.textContent = `Mode: Fit • Scale ${s.toFixed(3)} • ${currentDevice.w}×${currentDevice.h}px • ${currentDevice.name}`;
+    } else {
+      wrap.style.transform = 'scale(1)';
+      info.textContent = `Mode: 1:1 • ${currentDevice.w}×${currentDevice.h}px • ${currentDevice.name} (may overflow)`;
+    }
+  }
+
+  function scaleToFit() {
+    const padding = 24;
+    const chrome = 160;
+    const maxW = window.innerWidth - padding*2;
+    const maxH = window.innerHeight - chrome;
+    const scale = Math.min(maxW / (currentDevice.w + 32), maxH / (currentDevice.h + 32));
+    return Math.max(0.1, Math.min(scale, 1));
+  }
+
+  function setMobileView() {
+    // Always mobile view: iframe sized to device dimensions
+    frame.style.width = (currentDevice.w + 2) + 'px';
+    frame.style.height = (currentDevice.h + 2) + 'px';
+    frame.style.transform = 'scale(1)';
+  }
+
+  function loadURL() {
+    const u = url.value.trim();
+    if (!validURL(u)) {
+      alert('Please enter a valid absolute URL, e.g. https://example.com');
+      return;
+    }
+    
+    frame.src = u;
+    
+    // Try to detect when the iframe loads and inject mobile settings
+    frame.onload = function() {
+      try {
+        const iframeDoc = frame.contentDocument || frame.contentWindow.document;
+        if (iframeDoc) {
+          // Try to inject mobile viewport
+          let viewport = iframeDoc.querySelector('meta[name="viewport"]');
+          if (!viewport) {
+            viewport = iframeDoc.createElement('meta');
+            viewport.name = 'viewport';
+            viewport.content = `width=${currentDevice.w}, initial-scale=1.0, user-scalable=no`;
+            iframeDoc.head.appendChild(viewport);
+          } else {
+            viewport.content = `width=${currentDevice.w}, initial-scale=1.0, user-scalable=no`;
+          }
+        }
+      } catch (e) {
+        // CORS will prevent this, but that's okay
+        console.log('Cannot access iframe content due to CORS policy');
+      }
+    };
+  }
+
+  function validURL(u) {
+    try { new URL(u); return true; } catch { return false; }
+  }
+
+  loadBtn.addEventListener('click', loadURL);
+
+  url.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loadURL();
+  });
+
+  deviceSelect.addEventListener('change', updateDevice);
+
+  fitBtn.addEventListener('click', () => { mode = 'fit'; applyScale(); });
+  oneBtn.addEventListener('click', () => { mode = 'one'; applyScale(); });
+
+  downloadBtn.addEventListener('click', downloadScreenshot);
+
+  window.addEventListener('resize', applyScale);
+  
+  // Initialize
+  updateDevice();
+  setMobileView();
+  applyScale();
+  loadURL();
+
+  // Update info when iframe loads
+  frame.addEventListener('load', () => {
+    info.textContent += ' • Loaded';
+  });
+})();
+</script>
+</body>
+</html>

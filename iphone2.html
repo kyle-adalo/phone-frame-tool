@@ -24,27 +24,30 @@
 
   .toolbar {
     position: fixed;
-    inset: 12px 12px auto 12px;
+    left: 12px;
+    top: 12px;
+    bottom: 12px;
+    width: 280px;
     display: flex;
+    flex-direction: column;
     gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
     background: rgba(0,0,0,0.1);
     border: 1px solid rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
-    padding: 10px;
+    padding: 20px;
     border-radius: 14px;
     z-index: 10;
+    overflow-y: auto;
   }
   .toolbar input[type="text"] {
-    width: min(54vw, 680px);
-    max-width: 80vw;
+    width: 100%;
     padding: 10px 12px;
     border-radius: 10px;
     border: 1px solid rgba(0,0,0,0.3);
     background: rgba(255,255,255,0.9);
     color: #333;
     outline: none;
+    margin-bottom: 8px;
   }
   .btn {
     padding: 10px 12px;
@@ -64,7 +67,10 @@
 
   .stage {
     position: fixed;
-    inset: 0;
+    left: 320px;
+    top: 0;
+    right: 0;
+    bottom: 0;
     overflow: auto;
     padding: 20px;
     background: #ffffff;
@@ -72,17 +78,13 @@
 
   .device-wrap {
     position: absolute;
-    top: 10%;
-    left: 40%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     margin-top: 10px;
     padding: var(--chrome);
     background: linear-gradient(180deg, #0e0f14 0%, #090a0f 100%);
     border-radius: calc(var(--radius) + var(--chrome));
-    box-shadow:
-      0 40px 80px rgba(0,0,0,0.55),
-      0 6px 18px rgba(0,0,0,0.35),
-      inset 0 0 0 1px rgba(255,255,255,0.08);
     transform-origin: top center;
   }
 
@@ -196,6 +198,7 @@
     <button class="btn" id="loadBtn">Load</button>
     <button class="btn" id="fitBtn">Fit</button>
     <button class="btn" id="oneBtn">1:1</button>
+    <button class="btn" id="copyDimensionsBtn">Copy Crop Info</button>
     <button class="btn" id="downloadBtn">Save PNG</button>
     <span class="stat" id="info"></span>
   </div>
@@ -232,6 +235,7 @@
   const fitBtn = document.getElementById('fitBtn');
   const oneBtn = document.getElementById('oneBtn');
   const loadBtn = document.getElementById('loadBtn');
+  const copyDimensionsBtn = document.getElementById('copyDimensionsBtn');
   const downloadBtn = document.getElementById('downloadBtn');
 
   let mode = 'fit'; // 'fit' or 'one'
@@ -265,7 +269,70 @@
       cutout.style.display = 'block';
     }
     
-    applyScale();
+  function copyPhoneDimensions() {
+    try {
+      // Get the phone's position and dimensions on screen
+      const deviceRect = device.getBoundingClientRect();
+      const phoneArea = {
+        left: Math.round(deviceRect.left + window.scrollX),
+        top: Math.round(deviceRect.top + window.scrollY),
+        width: Math.round(deviceRect.width),
+        height: Math.round(deviceRect.height)
+      };
+
+      // Create detailed crop information
+      const cropInfo = `Phone Frame Crop Coordinates:
+
+📱 Device: ${currentDevice.name}
+📏 Target Size: ${currentDevice.w} × ${currentDevice.h} pixels
+
+🎯 Crop Area (for screenshot tools):
+• Left: ${phoneArea.left}px
+• Top: ${phoneArea.top}px  
+• Width: ${phoneArea.width}px
+• Height: ${phoneArea.height}px
+
+📋 Instructions:
+1. Take a full page screenshot (F12 → Ctrl+Shift+P → "Capture full size screenshot")
+2. Open in image editor
+3. Crop to: X=${phoneArea.left}, Y=${phoneArea.top}, W=${phoneArea.width}, H=${phoneArea.height}
+4. Resize to: ${currentDevice.w} × ${currentDevice.h} pixels for app store
+
+🔧 Alternative tools:
+• System screenshot: Win+Shift+S or Cmd+Shift+4
+• Select area from (${phoneArea.left}, ${phoneArea.top}) to (${phoneArea.left + phoneArea.width}, ${phoneArea.top + phoneArea.height})`;
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(cropInfo).then(() => {
+        // Show success message
+        const originalText = copyDimensionsBtn.textContent;
+        copyDimensionsBtn.textContent = 'Copied!';
+        copyDimensionsBtn.style.background = '#28a745';
+        
+        // Show detailed popup
+        alert(`Crop coordinates copied to clipboard!\n\nQuick reference:\nCrop area: ${phoneArea.left}, ${phoneArea.top}, ${phoneArea.width}×${phoneArea.height}\nTarget size: ${currentDevice.w}×${currentDevice.h}\n\nSee clipboard for full instructions.`);
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          copyDimensionsBtn.textContent = originalText;
+          copyDimensionsBtn.style.background = '';
+        }, 2000);
+      }).catch(() => {
+        // Fallback if clipboard API fails
+        const textArea = document.createElement('textarea');
+        textArea.value = cropInfo;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        alert('Crop coordinates copied to clipboard!\n\nPaste anywhere to see the full instructions.');
+      });
+
+    } catch (error) {
+      console.error('Copy dimensions failed:', error);
+      alert('Unable to copy coordinates. Try refreshing the page.');
+    }
   }
 
   async function downloadScreenshot() {
@@ -504,6 +571,8 @@
 
   fitBtn.addEventListener('click', () => { mode = 'fit'; applyScale(); });
   oneBtn.addEventListener('click', () => { mode = 'one'; applyScale(); });
+
+  copyDimensionsBtn.addEventListener('click', copyPhoneDimensions);
 
   downloadBtn.addEventListener('click', downloadScreenshot);
 

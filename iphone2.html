@@ -196,7 +196,6 @@
     <button class="btn" id="loadBtn">Load</button>
     <button class="btn" id="fitBtn">Fit</button>
     <button class="btn" id="oneBtn">1:1</button>
-    <button class="btn" id="copyDimensionsBtn">Copy Crop Info</button>
     <button class="btn" id="downloadBtn">Save PNG</button>
     <span class="stat" id="info"></span>
   </div>
@@ -233,7 +232,6 @@
   const fitBtn = document.getElementById('fitBtn');
   const oneBtn = document.getElementById('oneBtn');
   const loadBtn = document.getElementById('loadBtn');
-  const copyDimensionsBtn = document.getElementById('copyDimensionsBtn');
   const downloadBtn = document.getElementById('downloadBtn');
 
   let mode = 'fit'; // 'fit' or 'one'
@@ -267,70 +265,7 @@
       cutout.style.display = 'block';
     }
     
-  function copyPhoneDimensions() {
-    try {
-      // Get the phone's position and dimensions on screen
-      const deviceRect = device.getBoundingClientRect();
-      const phoneArea = {
-        left: Math.round(deviceRect.left + window.scrollX),
-        top: Math.round(deviceRect.top + window.scrollY),
-        width: Math.round(deviceRect.width),
-        height: Math.round(deviceRect.height)
-      };
-
-      // Create detailed crop information
-      const cropInfo = `Phone Frame Crop Coordinates:
-
-📱 Device: ${currentDevice.name}
-📏 Target Size: ${currentDevice.w} × ${currentDevice.h} pixels
-
-🎯 Crop Area (for screenshot tools):
-• Left: ${phoneArea.left}px
-• Top: ${phoneArea.top}px  
-• Width: ${phoneArea.width}px
-• Height: ${phoneArea.height}px
-
-📋 Instructions:
-1. Take a full page screenshot (F12 → Ctrl+Shift+P → "Capture full size screenshot")
-2. Open in image editor
-3. Crop to: X=${phoneArea.left}, Y=${phoneArea.top}, W=${phoneArea.width}, H=${phoneArea.height}
-4. Resize to: ${currentDevice.w} × ${currentDevice.h} pixels for app store
-
-🔧 Alternative tools:
-• System screenshot: Win+Shift+S or Cmd+Shift+4
-• Select area from (${phoneArea.left}, ${phoneArea.top}) to (${phoneArea.left + phoneArea.width}, ${phoneArea.top + phoneArea.height})`;
-
-      // Copy to clipboard
-      navigator.clipboard.writeText(cropInfo).then(() => {
-        // Show success message
-        const originalText = copyDimensionsBtn.textContent;
-        copyDimensionsBtn.textContent = 'Copied!';
-        copyDimensionsBtn.style.background = '#28a745';
-        
-        // Show detailed popup
-        alert(`Crop coordinates copied to clipboard!\n\nQuick reference:\nCrop area: ${phoneArea.left}, ${phoneArea.top}, ${phoneArea.width}×${phoneArea.height}\nTarget size: ${currentDevice.w}×${currentDevice.h}\n\nSee clipboard for full instructions.`);
-        
-        // Reset button after 2 seconds
-        setTimeout(() => {
-          copyDimensionsBtn.textContent = originalText;
-          copyDimensionsBtn.style.background = '';
-        }, 2000);
-      }).catch(() => {
-        // Fallback if clipboard API fails
-        const textArea = document.createElement('textarea');
-        textArea.value = cropInfo;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        alert('Crop coordinates copied to clipboard!\n\nPaste anywhere to see the full instructions.');
-      });
-
-    } catch (error) {
-      console.error('Copy dimensions failed:', error);
-      alert('Unable to copy coordinates. Try refreshing the page.');
-    }
+    applyScale();
   }
 
   async function downloadScreenshot() {
@@ -569,8 +504,6 @@
 
   fitBtn.addEventListener('click', () => { mode = 'fit'; applyScale(); });
   oneBtn.addEventListener('click', () => { mode = 'one'; applyScale(); });
-
-  copyDimensionsBtn.addEventListener('click', copyPhoneDimensions);
 
   downloadBtn.addEventListener('click', downloadScreenshot);
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>iPhone 6.7" (1284×2778) Mobile Frame</title>
+<title>iPhone 6.7" (1284×2778) Mobile Frame with Capture</title>
 <style>
   :root {
     --w: 428; /* iPhone Pro Max CSS pixels width */
@@ -24,17 +24,17 @@
 
   .toolbar {
     position: fixed;
-    left: 12px;
+    right: 12px;
     top: 12px;
     bottom: 12px;
-    width: 280px;
+    width: 250px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     background: rgba(0,0,0,0.1);
     border: 1px solid rgba(0,0,0,0.2);
     backdrop-filter: blur(10px);
-    padding: 20px;
+    padding: 15px;
     border-radius: 14px;
     z-index: 10;
     overflow-y: auto;
@@ -65,12 +65,108 @@
     font-size: 12px;
   }
 
+  /* Screenshot Capture Panel - Left Side */
+  .capture-panel {
+    position: fixed;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 220px;
+    background: rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.2);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 14px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .capture-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .capture-preview {
+    width: 100%;
+    height: 180px;
+    background: rgba(255,255,255,0.5);
+    border: 2px dashed rgba(0,0,0,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .capture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .preview-placeholder {
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .capture-btn {
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .capture-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .capture-btn:active {
+    transform: translateY(0);
+  }
+
+  .capture-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .download-capture-btn {
+    padding: 10px;
+    background: transparent;
+    color: #333;
+    border: 1px solid rgba(0,0,0,0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: none;
+  }
+
+  .download-capture-btn.show {
+    display: block;
+  }
+
+  .download-capture-btn:hover {
+    background: rgba(255,255,255,0.8);
+    border-color: rgba(0,0,0,0.3);
+  }
+
   .stage {
     position: fixed;
-    left: 320px;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     overflow: auto;
     padding: 20px;
     background: #ffffff;
@@ -78,14 +174,22 @@
 
   .device-wrap {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 10%;
+    left: 40%;
     transform: translate(-50%, -50%);
     margin-top: 10px;
     padding: var(--chrome);
     background: linear-gradient(180deg, #0e0f14 0%, #090a0f 100%);
     border-radius: calc(var(--radius) + var(--chrome));
     transform-origin: top center;
+    transition: all 0.3s ease;
+  }
+
+  /* Hide phone outline when toggled off */
+  .device-wrap.hide-outline {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
   }
 
   .device {
@@ -96,6 +200,13 @@
     background: #000;
     position: relative;
     isolation: isolate;
+    transition: all 0.3s ease;
+  }
+
+  /* Remove device styling when outline is hidden */
+  .device-wrap.hide-outline .device {
+    border-radius: 0;
+    background: transparent;
   }
 
   .screen {
@@ -105,6 +216,12 @@
     overflow: hidden;
     margin: 0;
     padding: 0;
+  }
+  
+  /* Adjust screen when outline is hidden */
+  .device-wrap.hide-outline .screen {
+    inset: 0;
+    border-radius: 0;
   }
   
   .mobile-container {
@@ -129,6 +246,12 @@
     left: -1px;
   }
 
+  /* Adjust iframe when outline is hidden */
+  .device-wrap.hide-outline .screen iframe {
+    top: 0;
+    left: 0;
+  }
+
   /* Dynamic Island */
   .cutout {
     position: absolute;
@@ -145,8 +268,14 @@
     opacity: 0.95;
     pointer-events: none;
     z-index: 10;
+    transition: all 0.3s ease;
   }
   .cutout.hidden { display: none; }
+  
+  /* Hide cutout when outline is hidden */
+  .device-wrap.hide-outline .cutout {
+    display: none;
+  }
 
   /* Subtle pixel grid overlay (toggleable) */
   .grid {
@@ -171,16 +300,291 @@
     background: transparent;
     z-index: 5;
     pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  /* Hide status bar when outline is hidden */
+  .device-wrap.hide-outline .status-bar {
+    display: none;
+  }
+
+  /* Screenshot Guidelines */
+  .screenshot-guide {
+    position: absolute;
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .screenshot-guide.show {
+    opacity: 1;
+  }
+
+  .guide-corners {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .guide-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 4px solid #ff6b35;
+  }
+
+  .guide-corner.top-left {
+    top: calc(-1 * var(--chrome) - 15px);
+    left: calc(-1 * var(--chrome) - 15px);
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .guide-corner.top-right {
+    top: calc(-1 * var(--chrome) - 15px);
+    right: calc(-1 * var(--chrome) - 15px);
+    border-left: none;
+    border-bottom: none;
+  }
+
+  .guide-corner.bottom-left {
+    bottom: calc(-1 * var(--chrome) - 15px);
+    left: calc(-1 * var(--chrome) - 15px);
+    border-right: none;
+    border-top: none;
+  }
+
+  .guide-corner.bottom-right {
+    bottom: calc(-1 * var(--chrome) - 15px);
+    right: calc(-1 * var(--chrome) - 15px);
+    border-left: none;
+    border-top: none;
+  }
+
+  /* Adjust guide corners when outline is hidden */
+  .device-wrap.hide-outline .guide-corner.top-left {
+    top: -15px;
+    left: -15px;
+  }
+
+  .device-wrap.hide-outline .guide-corner.top-right {
+    top: -15px;
+    right: -15px;
+  }
+
+  .device-wrap.hide-outline .guide-corner.bottom-left {
+    bottom: -15px;
+    left: -15px;
+  }
+
+  .device-wrap.hide-outline .guide-corner.bottom-right {
+    bottom: -15px;
+    right: -15px;
+  }
+
+  .guide-label {
+    position: absolute;
+    top: calc(-1 * var(--chrome) - 80px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff6b35;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  }
+
+  /* Adjust guide label when outline is hidden */
+  .device-wrap.hide-outline .guide-label {
+    top: -80px;
+  }
+
+  .guide-label::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #ff6b35;
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -20px;
+    }
+  }
+
+  /* Guide Instructions - positioned above button */
+  .guide-instructions-box {
+    position: fixed;
+    bottom: 140px;
+    left: 20px;
+    background: rgba(255, 107, 53, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 11px;
+    text-align: left;
+    line-height: 1.4;
+    width: 200px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 30;
+  }
+
+  .guide-instructions-box.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Phone Outline Toggle Button */
+  .toggle-outline-btn {
+    position: fixed;
+    bottom: 80px;
+    left: 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s;
+    z-index: 30;
+    font-size: 13px;
+  }
+
+  .toggle-outline-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .toggle-outline-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Toggle Guide Button */
+  .toggle-guide-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #ff6b35, #f7931e);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    transition: all 0.3s;
+    z-index: 30;
+    font-size: 13px;
+  }
+
+  .toggle-guide-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
+  }
+
+  .toggle-guide-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Flash animation */
+  @keyframes flash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .flash-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    pointer-events: none;
+    opacity: 0;
+    border-radius: inherit;
+    z-index: 100;
+  }
+
+  .flash-overlay.flash {
+    animation: flash 0.3s ease-out;
+  }
+
+  /* Remove flash overlay border radius when outline is hidden */
+  .device-wrap.hide-outline .flash-overlay {
+    border-radius: 0;
+  }
+
+  .capture-info {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    padding: 8px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 8px;
+  }
+
+  @keyframes dash {
+    0% {
+      stroke-dasharray: 10, 5;
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 15;
+    }
   }
 </style>
 </head>
 <body>
+  <!-- Screenshot Upload Panel - Left Side -->
+  <div class="capture-panel">
+    <div class="capture-header">📸 Screenshot Manager</div>
+    
+    <div class="capture-preview" id="capturePreview">
+      <div class="preview-placeholder">
+        No Image Uploaded<br>
+        Click "Choose File" below<br>
+        to upload a screenshot
+      </div>
+    </div>
+    
+    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+    
+    <button class="capture-btn" onclick="document.getElementById('fileInput').click()">
+      📁 Choose Screenshot File
+    </button>
+    
+    <button class="download-capture-btn" id="downloadCaptureBtn" onclick="processAndDownloadImages()">
+      💾 Download Images
+    </button>
+    
+    <div class="capture-info" id="uploadInfo">
+      Upload a screenshot to<br>
+      auto-format for App Store
+    </div>
+  </div>
+
+  <!-- Original Toolbar - Right Side -->
   <div class="toolbar">
-    <select id="deviceSelect" class="btn" style="padding: 10px 12px; min-width: 200px;">
-      <option value="428,926,44,iPhone 6.7 Pro Max">iPhone 6.7" Pro Max (428×926)</option>
+    <select id="deviceSelect" class="btn" style="padding: 10px 12px; min-width: 100%;">
+      <option value="414,896,36,iPhone 6.5">iPhone 6.5" (414×896)</option>
       <option value="390,844,44,iPhone 6.1">iPhone 6.1" (390×844)</option>
       <option value="375,812,36,iPhone 5.8">iPhone 5.8" (375×812)</option>
-      <option value="414,896,36,iPhone 6.5">iPhone 6.5" (414×896)</option>
+      <option value="428,926,44,iPhone 6.7 Pro Max">iPhone 6.7" Pro Max (428×926)</option>
       <option value="375,667,12,iPhone 4.7">iPhone 4.7" (375×667)</option>
       <option value="320,568,12,iPhone 4">iPhone 4" (320×568)</option>
       <option value="390,844,44,iPhone 12 mini">iPhone 12 mini (390×844)</option>
@@ -203,9 +607,40 @@
     <span class="stat" id="info"></span>
   </div>
 
+  <!-- Phone Outline Toggle Button -->
+  <button class="toggle-outline-btn" id="toggleOutlineBtn" onclick="togglePhoneOutline()">
+    📱 Hide Phone Frame
+  </button>
+
+  <!-- Screenshot Guide Toggle Button -->
+  <button class="toggle-guide-btn" id="toggleGuideBtn" onclick="toggleScreenshotGuide()">
+    📐 Show Screenshot Guide
+  </button>
+
+  <!-- Guide Instructions Box - positioned above button -->
+  <div class="guide-instructions-box" id="guideInstructionsBox">
+    Use corner guides for screenshot area<br>
+    • Windows: Win + Shift + S<br>
+    • Mac: Cmd + Shift + 4<br>
+    • Chrome DevTools: F12 → Capture
+  </div>
+
   <div class="stage" id="stage">
     <div class="device-wrap" id="wrap">
+      <!-- Screenshot Guidelines -->
+      <div class="screenshot-guide" id="screenshotGuide">
+        <div class="guide-border" id="guideBorder"></div>
+        <div class="guide-corners">
+          <div class="guide-corner top-left"></div>
+          <div class="guide-corner top-right"></div>
+          <div class="guide-corner bottom-left"></div>
+          <div class="guide-corner bottom-right"></div>
+        </div>
+        <div class="guide-label">📸 Screenshot Area</div>
+      </div>
+      
       <div class="device" id="device">
+        <div class="flash-overlay" id="flashOverlay"></div>
         <div class="screen">
           <div class="mobile-container">
             <iframe id="frame" src="https://amanda-burnss-team-1.adalo.com/mynavy-app/" referrerpolicy="no-referrer"></iframe>
@@ -219,6 +654,588 @@
   </div>
 
 <script>
+// Phone outline toggle functionality
+let outlineVisible = true;
+
+function togglePhoneOutline() {
+  const wrap = document.getElementById('wrap');
+  const btn = document.getElementById('toggleOutlineBtn');
+  
+  outlineVisible = !outlineVisible;
+  
+  if (outlineVisible) {
+    wrap.classList.remove('hide-outline');
+    btn.textContent = '📱 Hide Phone Frame';
+    btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+  } else {
+    wrap.classList.add('hide-outline');
+    btn.textContent = '📱 Show Phone Frame';
+    btn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+  }
+  
+  // Update guide position if visible
+  if (guideVisible) {
+    updateGuidePosition();
+  }
+}
+
+// Screenshot guide functionality
+let guideVisible = false;
+
+function toggleScreenshotGuide() {
+  const guide = document.getElementById('screenshotGuide');
+  const instructionsBox = document.getElementById('guideInstructionsBox');
+  const btn = document.getElementById('toggleGuideBtn');
+  
+  guideVisible = !guideVisible;
+  
+  if (guideVisible) {
+    guide.classList.add('show');
+    instructionsBox.classList.add('show');
+    btn.textContent = '❌ Hide Screenshot Guide';
+    btn.style.background = 'linear-gradient(135deg, #ff4757, #ff3742)';
+    updateGuidePosition();
+  } else {
+    guide.classList.remove('show');
+    instructionsBox.classList.remove('show');
+    btn.textContent = '📐 Show Screenshot Guide';
+    btn.style.background = 'linear-gradient(135deg, #ff6b35, #f7931e)';
+  }
+}
+
+function updateGuidePosition() {
+  const guide = document.getElementById('screenshotGuide');
+  const guideBorder = document.getElementById('guideBorder');
+  const wrap = document.getElementById('wrap');
+  
+  if (!guide || !guideBorder || !wrap) return;
+  
+  // Position the guide to match the device wrap exactly
+  const wrapRect = wrap.getBoundingClientRect();
+  const wrapStyle = getComputedStyle(wrap);
+  
+  // Get the device wrap's padding (chrome) - 0 when outline is hidden
+  const chrome = outlineVisible ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('--chrome'), 10) : 0;
+  
+  // Position guide to match device wrap
+  guide.style.position = 'absolute';
+  guide.style.top = '0';
+  guide.style.left = '0';
+  guide.style.width = '100%';
+  guide.style.height = '100%';
+  
+  // Position the dashed border to match the outer edge of device wrap
+  guideBorder.style.top = `-${chrome}px`;
+  guideBorder.style.left = `-${chrome}px`;
+  guideBorder.style.right = `-${chrome}px`;
+  guideBorder.style.bottom = `-${chrome}px`;
+}
+
+// Screenshot upload and management functionality
+let uploadedImage = null;
+let uploadedImageData = null;
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    uploadedImageData = e.target.result;
+    
+    // Create image element to display
+    const img = new Image();
+    img.onload = function() {
+      uploadedImage = img;
+      
+      // Display in preview
+      const preview = document.getElementById('capturePreview');
+      const displayImg = document.createElement('img');
+      displayImg.src = uploadedImageData;
+      displayImg.style.width = '100%';
+      displayImg.style.height = '100%';
+      displayImg.style.objectFit = 'contain';
+      displayImg.style.borderRadius = '8px';
+      
+      preview.innerHTML = '';
+      preview.appendChild(displayImg);
+      
+      // Show download button
+      document.getElementById('downloadCaptureBtn').classList.add('show');
+      
+      // Update info
+      document.getElementById('uploadInfo').innerHTML = 
+        `Image loaded: ${img.width}×${img.height}px<br>
+        Ready to process`;
+    };
+    img.src = uploadedImageData;
+  };
+  reader.readAsDataURL(file);
+}
+
+function processAndDownloadImages() {
+  if (!uploadedImage) {
+    alert('Please upload an image first');
+    return;
+  }
+  
+  // Get current device dimensions from the selected device
+  const deviceSelect = document.getElementById('deviceSelect');
+  const selected = deviceSelect.value.split(',');
+  const deviceName = selected[3];
+  
+  // ALWAYS use App Store screenshot resolution for Apple devices: 1242×2688
+  const isAppleDevice = deviceName.includes('iPhone') || deviceName.includes('iPad');
+  
+  // Force correct dimensions
+  let targetWidth, targetHeight;
+  if (isAppleDevice) {
+    targetWidth = 1242;
+    targetHeight = 2688;
+  } else {
+    targetWidth = parseInt(selected[0]);
+    targetHeight = parseInt(selected[1]);
+  }
+  
+  // Update button to show processing
+  const downloadBtn = document.getElementById('downloadCaptureBtn');
+  downloadBtn.textContent = 'Processing...';
+  downloadBtn.disabled = true;
+  
+  // Process both versions with improved download system
+  createBothVersionsFromUpload(targetWidth, targetHeight, deviceName, isAppleDevice, downloadBtn);
+}
+
+function createBothVersionsFromUpload(targetWidth, targetHeight, deviceName, isAppleDevice, downloadBtn) {
+  const timestamp = Date.now();
+  let downloadsCompleted = 0;
+  const totalDownloads = 2;
+  
+  // Function to trigger download for uploaded images
+  function triggerUploadDownload(blob, filename) {
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = blobUrl;
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    
+    setTimeout(() => {
+      link.click();
+      downloadsCompleted++;
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+        
+        if (downloadsCompleted === totalDownloads) {
+          // Reset button and update info
+          downloadBtn.textContent = '💾 Download Images';
+          downloadBtn.disabled = false;
+          
+          document.getElementById('uploadInfo').innerHTML = 
+            `✅ Both files downloaded!<br>
+            ${targetWidth}×${targetHeight}px<br>
+            Transparent PNG & White JPG`;
+        }
+      }, 100);
+    }, 200);
+  }
+  
+  // 1. Create TRANSPARENT PNG version
+  setTimeout(() => {
+    createTransparentVersion(targetWidth, targetHeight, deviceName, timestamp, triggerUploadDownload);
+  }, 100);
+  
+  // 2. Create WHITE BACKGROUND JPG version  
+  setTimeout(() => {
+    createWhiteBackgroundVersion(targetWidth, targetHeight, deviceName, timestamp, triggerUploadDownload);
+  }, 800);
+}
+
+function createTransparentVersion(targetWidth, targetHeight, deviceName, timestamp, triggerDownload) {
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext('2d');
+  
+  // CRUCIAL: Enable transparency by NOT setting any background
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  
+  // Calculate scale to fit the image within the target dimensions while maintaining aspect ratio
+  const scaleX = targetWidth / uploadedImage.width;
+  const scaleY = targetHeight / uploadedImage.height;
+  const scale = Math.min(scaleX, scaleY) * 0.9; // Use 0.9 to add some padding
+  
+  const scaledWidth = uploadedImage.width * scale;
+  const scaledHeight = uploadedImage.height * scale;
+  
+  // Center the image both horizontally and vertically
+  const x = (targetWidth - scaledWidth) / 2;
+  const y = (targetHeight - scaledHeight) / 2;
+  
+  // Draw the image centered on the transparent canvas
+  ctx.drawImage(
+    uploadedImage,
+    0, 0, uploadedImage.width, uploadedImage.height,
+    Math.round(x), Math.round(y), Math.round(scaledWidth), Math.round(scaledHeight)
+  );
+  
+  // Apply white-to-transparent conversion
+  makeWhiteAreasTransparent(ctx, targetWidth, targetHeight);
+  
+  canvas.toBlob(function(blob) {
+    if (!blob) {
+      console.error('Failed to create transparent PNG');
+      return;
+    }
+    triggerDownload(blob, `${deviceName}_TRANSPARENT_${timestamp}.png`);
+  }, 'image/png', 1.0);
+}
+
+function makeWhiteAreasTransparent(ctx, width, height) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  
+  // Much more aggressive approach - remove almost all white/light colors
+  const whiteThreshold = 235; // Lower threshold to catch more white variations
+  const tolerance = 25; // Higher tolerance for color variations
+  
+  // Find the phone content area (non-white pixels)
+  const phoneArea = findPhoneContentBounds(data, width, height);
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const alpha = data[i + 3];
+      
+      if (alpha > 0) {
+        // Check if this pixel is white-ish
+        const avgColor = (r + g + b) / 3;
+        const isLight = avgColor >= whiteThreshold;
+        const colorVariation = Math.max(Math.abs(r - g), Math.abs(g - b), Math.abs(r - b));
+        const isNeutral = colorVariation <= tolerance;
+        
+        // More aggressive: make transparent if it's light AND neutral colored
+        if (isLight && isNeutral) {
+          // Additional check: if we're far from phone content, definitely make transparent
+          const distanceFromPhone = getDistanceFromPhone(x, y, phoneArea);
+          
+          if (distanceFromPhone > 15) {
+            // Far from phone - definitely background
+            data[i + 3] = 0;
+          } else if (distanceFromPhone > 5 && avgColor >= 245) {
+            // Close to phone but very white - likely background
+            data[i + 3] = 0;
+          } else if (distanceFromPhone > 0 && avgColor >= 250 && colorVariation <= 5) {
+            // Very close to phone but pure white - background
+            data[i + 3] = 0;
+          }
+        }
+      }
+    }
+  }
+  
+  // Apply the modified image data back to the canvas
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function findPhoneContentBounds(data, width, height) {
+  const bounds = {
+    left: width,
+    right: 0,
+    top: height,
+    bottom: 0,
+    centerX: width / 2,
+    centerY: height / 2
+  };
+  
+  // Find bounds of definitely non-white content (phone frame, screen elements)
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const alpha = data[i + 3];
+      
+      // Look for clearly non-white content
+      const avgColor = (r + g + b) / 3;
+      const isDefinitelyContent = alpha > 0 && avgColor < 200;
+      
+      if (isDefinitelyContent) {
+        bounds.left = Math.min(bounds.left, x);
+        bounds.right = Math.max(bounds.right, x);
+        bounds.top = Math.min(bounds.top, y);
+        bounds.bottom = Math.max(bounds.bottom, y);
+      }
+    }
+  }
+  
+  // Update center based on actual content
+  if (bounds.left < bounds.right && bounds.top < bounds.bottom) {
+    bounds.centerX = (bounds.left + bounds.right) / 2;
+    bounds.centerY = (bounds.top + bounds.bottom) / 2;
+  }
+  
+  return bounds;
+}
+
+function getDistanceFromPhone(x, y, phoneArea) {
+  // Calculate minimum distance from phone content area
+  const centerX = phoneArea.centerX;
+  const centerY = phoneArea.centerY;
+  
+  // Distance from center of phone content
+  const distanceFromCenter = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+  
+  // Also check distance from content bounds
+  let distanceFromBounds = 0;
+  
+  if (phoneArea.left < phoneArea.right && phoneArea.top < phoneArea.bottom) {
+    if (x < phoneArea.left) distanceFromBounds += phoneArea.left - x;
+    if (x > phoneArea.right) distanceFromBounds += x - phoneArea.right;
+    if (y < phoneArea.top) distanceFromBounds += phoneArea.top - y;
+    if (y > phoneArea.bottom) distanceFromBounds += y - phoneArea.bottom;
+  }
+  
+  return Math.min(distanceFromCenter * 0.1, distanceFromBounds);
+}
+
+function createWhiteBackgroundVersion(targetWidth, targetHeight, deviceName, timestamp, triggerDownload) {
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  
+  // ALWAYS fill with WHITE background first
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, targetWidth, targetHeight);
+  
+  // Calculate scale to fit the image within the target dimensions while maintaining aspect ratio
+  const scaleX = targetWidth / uploadedImage.width;
+  const scaleY = targetHeight / uploadedImage.height;
+  const scale = Math.min(scaleX, scaleY) * 0.9; // Use 0.9 to add some padding
+  
+  const scaledWidth = uploadedImage.width * scale;
+  const scaledHeight = uploadedImage.height * scale;
+  
+  // Center the image both horizontally and vertically
+  const x = (targetWidth - scaledWidth) / 2;
+  const y = (targetHeight - scaledHeight) / 2;
+  
+  // Draw the image centered on the white background
+  ctx.drawImage(
+    uploadedImage,
+    0, 0, uploadedImage.width, uploadedImage.height,
+    Math.round(x), Math.round(y), Math.round(scaledWidth), Math.round(scaledHeight)
+  );
+  
+  canvas.toBlob(function(blob) {
+    if (!blob) {
+      console.error('Failed to create white background JPG');
+      return;
+    }
+    triggerDownload(blob, `${deviceName}_WHITE_BG_${timestamp}.jpg`);
+  }, 'image/jpeg', 0.95);
+}
+
+function createAndDownload(targetWidth, targetHeight, useTransparent, deviceName, isAppleDevice) {
+  // Create high-resolution canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const ctx = canvas.getContext('2d');
+  
+  // Set high quality rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  
+  // For transparent version, we need to detect if the image has a phone frame
+  // Check if the uploaded image appears to be a phone mockup with frame
+  const hasPhoneFrame = checkForPhoneFrame(uploadedImage);
+  
+  if (useTransparent && hasPhoneFrame) {
+    // For phone mockups with frames, scale to fit and preserve the frame
+    const scale = Math.min(targetWidth / uploadedImage.width, targetHeight / uploadedImage.height) * 0.85; // Scale down slightly to ensure frame fits
+    const scaledWidth = uploadedImage.width * scale;
+    const scaledHeight = uploadedImage.height * scale;
+    const x = (targetWidth - scaledWidth) / 2;
+    const y = (targetHeight - scaledHeight) / 2;
+    
+    // Draw the image with phone frame
+    ctx.drawImage(
+      uploadedImage,
+      0, 0, uploadedImage.width, uploadedImage.height,
+      Math.round(x), Math.round(y), Math.round(scaledWidth), Math.round(scaledHeight)
+    );
+    
+    // Crop to content bounds (remove excess transparent areas but keep the phone frame)
+    const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+    const pixels = imageData.data;
+    
+    let minX = targetWidth, minY = targetHeight, maxX = 0, maxY = 0;
+    
+    // Find bounds of non-transparent content
+    for (let y = 0; y < targetHeight; y++) {
+      for (let x = 0; x < targetWidth; x++) {
+        const idx = (y * targetWidth + x) * 4;
+        const alpha = pixels[idx + 3];
+        
+        if (alpha > 20) { // Slightly higher threshold to catch anti-aliased edges
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    // Add minimal padding
+    const padding = 5;
+    minX = Math.max(0, minX - padding);
+    minY = Math.max(0, minY - padding);
+    maxX = Math.min(targetWidth - 1, maxX + padding);
+    maxY = Math.min(targetHeight - 1, maxY + padding);
+    
+    const croppedWidth = maxX - minX + 1;
+    const croppedHeight = maxY - minY + 1;
+    
+    // Create cropped canvas with phone frame
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = croppedWidth;
+    croppedCanvas.height = croppedHeight;
+    const croppedCtx = croppedCanvas.getContext('2d');
+    croppedCtx.imageSmoothingEnabled = true;
+    croppedCtx.imageSmoothingQuality = 'high';
+    
+    croppedCtx.drawImage(canvas,
+      minX, minY, croppedWidth, croppedHeight,
+      0, 0, croppedWidth, croppedHeight
+    );
+    
+    // Save the transparent version with phone frame
+    croppedCanvas.toBlob(function(blob) {
+      if (!blob) return;
+      
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = isAppleDevice ? 
+        `AppStore_iPhone_with_frame_transparent_${Date.now()}.png` :
+        `${deviceName.replace(/[^a-zA-Z0-9]/g, '_')}_with_frame_transparent_${Date.now()}.png`;
+      
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => URL.revokeObject(blobUrl), 1000);
+    }, 'image/png', 1.0); // Maximum quality for PNG
+    
+  } else if (useTransparent) {
+    // For regular screenshots without phone frame, just scale and center
+    const scale = Math.min(targetWidth / uploadedImage.width, targetHeight / uploadedImage.height);
+    const scaledWidth = uploadedImage.width * scale;
+    const scaledHeight = uploadedImage.height * scale;
+    const x = (targetWidth - scaledWidth) / 2;
+    const y = (targetHeight - scaledHeight) / 2;
+    
+    ctx.drawImage(
+      uploadedImage,
+      0, 0, uploadedImage.width, uploadedImage.height,
+      Math.round(x), Math.round(y), Math.round(scaledWidth), Math.round(scaledHeight)
+    );
+    
+    canvas.toBlob(function(blob) {
+      if (!blob) return;
+      
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = isAppleDevice ? 
+        `AppStore_iPhone_${targetWidth}x${targetHeight}_white_${Date.now()}.jpg` :
+        `${deviceName.replace(/[^a-zA-Z0-9]/g, '_')}_${targetWidth}x${targetHeight}_white_${Date.now()}.jpg`;
+      
+      link.href = blobUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    }, 'image/jpeg', 0.95);
+  }
+}
+
+// Helper function to detect if image has a phone frame
+function checkForPhoneFrame(img) {
+  // Create a temporary canvas to analyze the image
+  const tempCanvas = document.createElement('canvas');
+  const size = 100; // Sample size
+  tempCanvas.width = size;
+  tempCanvas.height = size;
+  const tempCtx = tempCanvas.getContext('2d');
+  
+  // Draw scaled down version for analysis
+  tempCtx.drawImage(img, 0, 0, size, size);
+  const imageData = tempCtx.getImageData(0, 0, size, size);
+  const pixels = imageData.data;
+  
+  // Check corners for dark pixels (typical of phone frames)
+  let darkCorners = 0;
+  const positions = [
+    [0, 0], [size-1, 0], [0, size-1], [size-1, size-1], // corners
+    [size/2, 0], [size/2, size-1], [0, size/2], [size-1, size/2] // edges
+  ];
+  
+  for (let [x, y] of positions) {
+    const idx = (Math.floor(y) * size + Math.floor(x)) * 4;
+    const r = pixels[idx];
+    const g = pixels[idx + 1];
+    const b = pixels[idx + 2];
+    const brightness = (r + g + b) / 3;
+    
+    if (brightness < 100) darkCorners++;
+  }
+  
+  // If most edge positions are dark, likely has a phone frame
+  return darkCorners >= 6;
+}
+
+// Keep the original capture function for the Copy Crop Info button
+async function capturePhoneToPreview() {
+  // This function is still called by copyPhoneDimensions
+  // but now it just shows instructions since we're using upload instead
+  const preview = document.getElementById('capturePreview');
+  preview.innerHTML = `
+    <div class="preview-placeholder" style="padding: 20px; text-align: center;">
+      <div style="font-size: 24px; margin-bottom: 10px;">📋</div>
+      <div style="font-size: 12px; color: #666;">
+        Crop coordinates copied!<br><br>
+        Now take a screenshot using:<br>
+        • F12 → Ctrl+Shift+P → "Capture"<br>
+        • Or Win+Shift+S / Cmd+Shift+4<br><br>
+        Then upload it here to process
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('uploadInfo').innerHTML = 
+    'Upload your screenshot to<br>auto-format for App Store';
+}
+
+// Original code continues below
 (function(){
   const W = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w'), 10);
   const H = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--h'), 10);
@@ -269,7 +1286,15 @@
       cutout.style.display = 'block';
     }
     
-  function copyPhoneDimensions() {
+    applyScale();
+    
+    // Update guide position if visible
+    if (guideVisible) {
+      updateGuidePosition();
+    }
+  }
+
+  async function copyPhoneDimensions() {
     try {
       // Get the phone's position and dimensions on screen
       const deviceRect = device.getBoundingClientRect();
@@ -303,31 +1328,24 @@
 • Select area from (${phoneArea.left}, ${phoneArea.top}) to (${phoneArea.left + phoneArea.width}, ${phoneArea.top + phoneArea.height})`;
 
       // Copy to clipboard
-      navigator.clipboard.writeText(cropInfo).then(() => {
-        // Show success message
-        const originalText = copyDimensionsBtn.textContent;
-        copyDimensionsBtn.textContent = 'Copied!';
-        copyDimensionsBtn.style.background = '#28a745';
-        
-        // Show detailed popup
-        alert(`Crop coordinates copied to clipboard!\n\nQuick reference:\nCrop area: ${phoneArea.left}, ${phoneArea.top}, ${phoneArea.width}×${phoneArea.height}\nTarget size: ${currentDevice.w}×${currentDevice.h}\n\nSee clipboard for full instructions.`);
-        
-        // Reset button after 2 seconds
-        setTimeout(() => {
-          copyDimensionsBtn.textContent = originalText;
-          copyDimensionsBtn.style.background = '';
-        }, 2000);
-      }).catch(() => {
-        // Fallback if clipboard API fails
-        const textArea = document.createElement('textarea');
-        textArea.value = cropInfo;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        alert('Crop coordinates copied to clipboard!\n\nPaste anywhere to see the full instructions.');
-      });
+      await navigator.clipboard.writeText(cropInfo);
+      
+      // Show success message
+      const originalText = copyDimensionsBtn.textContent;
+      copyDimensionsBtn.textContent = 'Copied!';
+      copyDimensionsBtn.style.background = '#28a745';
+      
+      // Update the left panel with instructions
+      await capturePhoneToPreview();
+      
+      // Show detailed popup
+      alert(`✅ Crop coordinates copied to clipboard!\n\nQuick reference:\nCrop area: ${phoneArea.left}, ${phoneArea.top}, ${phoneArea.width}×${phoneArea.height}\nTarget size: ${currentDevice.w}×${currentDevice.h}\n\nNow:\n1. Take a screenshot using the coordinates\n2. Upload it in the left panel\n3. Click "Auto-Crop to Phone Size" for perfect dimensions!`);
+      
+      // Reset button after 2 seconds
+      setTimeout(() => {
+        copyDimensionsBtn.textContent = originalText;
+        copyDimensionsBtn.style.background = '';
+      }, 2000);
 
     } catch (error) {
       console.error('Copy dimensions failed:', error);
@@ -337,9 +1355,6 @@
 
   async function downloadScreenshot() {
     try {
-      downloadBtn.textContent = 'Loading...';
-      downloadBtn.disabled = true;
-
       // Get the phone's position and dimensions
       const deviceRect = device.getBoundingClientRect();
       const phoneArea = {
@@ -400,6 +1415,9 @@
   }
 
   async function fallbackScreenshot() {
+    downloadBtn.textContent = 'Processing...';
+    downloadBtn.disabled = true;
+
     // Import html2canvas if not already loaded
     if (!window.html2canvas) {
       console.log('Loading html2canvas...');
@@ -420,82 +1438,193 @@
       });
     }
 
-    console.log('Starting fallback screenshot...');
+    console.log('Starting transparent screenshot capture...');
 
-    // Hide toolbar
+    // Hide toolbar and guides
     const toolbar = document.querySelector('.toolbar');
+    const capturePanel = document.querySelector('.capture-panel');
+    const toggleBtn = document.getElementById('toggleGuideBtn');
+    const outlineBtn = document.getElementById('toggleOutlineBtn');
+    const guide = document.getElementById('screenshotGuide');
+    const stage = document.getElementById('stage');
+    
     const originalToolbarDisplay = toolbar.style.display;
+    const originalCaptureDisplay = capturePanel.style.display;
+    const originalToggleDisplay = toggleBtn.style.display;
+    const originalOutlineDisplay = outlineBtn.style.display;
+    const originalGuideVisibility = guide.classList.contains('show');
+    const originalStageBackground = stage.style.background;
     
     toolbar.style.display = 'none';
+    capturePanel.style.display = 'none';
+    toggleBtn.style.display = 'none';
+    outlineBtn.style.display = 'none';
+    guide.classList.remove('show');
+    
+    // Make stage background transparent for the capture
+    stage.style.background = 'transparent';
 
-    // Set device to 1:1 scale
+    // Set device to 1:1 scale for accurate capture
     const originalTransform = wrap.style.transform;
     wrap.style.transform = 'scale(1)';
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Try to capture with iframe content included
-    console.log('Capturing screenshot with iframe content...');
-    const canvas = await window.html2canvas(wrap, {
-      backgroundColor: '#ffffff',
-      scale: 1,
-      useCORS: true,
-      allowTaint: true,
-      foreignObjectRendering: true,
-      ignoreElements: function(element) {
-        return false;
-      },
-      onclone: function(clonedDoc) {
-        const clonedIframe = clonedDoc.querySelector('#frame');
-        if (clonedIframe) {
-          try {
-            const iframeDoc = document.querySelector('#frame').contentDocument;
-            if (iframeDoc) {
-              const replacement = clonedDoc.createElement('div');
-              replacement.innerHTML = iframeDoc.body.innerHTML;
-              replacement.style.cssText = clonedIframe.style.cssText;
-              clonedIframe.parentNode.replaceChild(replacement, clonedIframe);
+    try {
+      // Capture the device wrap with transparent background
+      console.log('Capturing device with transparent background...');
+      const canvas = await window.html2canvas(wrap, {
+        backgroundColor: null, // This creates transparent background
+        scale: 2, // Higher resolution for better quality
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: true,
+        ignoreElements: function(element) {
+          // Don't ignore any elements for complete capture
+          return false;
+        },
+        onclone: function(clonedDoc) {
+          const clonedIframe = clonedDoc.querySelector('#frame');
+          if (clonedIframe) {
+            try {
+              const iframeDoc = document.querySelector('#frame').contentDocument;
+              if (iframeDoc) {
+                const replacement = clonedDoc.createElement('div');
+                replacement.innerHTML = iframeDoc.body.innerHTML;
+                replacement.style.cssText = clonedIframe.style.cssText;
+                replacement.style.background = iframeDoc.body.style.background || '#ffffff';
+                clonedIframe.parentNode.replaceChild(replacement, clonedIframe);
+              }
+            } catch (e) {
+              console.warn('Cannot access iframe content due to CORS:', e);
+              // Create a better placeholder that looks like app content
+              const placeholder = clonedDoc.createElement('div');
+              placeholder.style.cssText = clonedIframe.style.cssText;
+              placeholder.style.background = '#ffffff';
+              placeholder.style.display = 'flex';
+              placeholder.style.alignItems = 'center';
+              placeholder.style.justifyContent = 'center';
+              placeholder.style.flexDirection = 'column';
+              placeholder.style.color = '#333';
+              placeholder.style.fontFamily = 'system-ui';
+              placeholder.style.textAlign = 'center';
+              placeholder.innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 20px;">📱</div>
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">Your App Content</div>
+                <div style="font-size: 14px; opacity: 0.7; line-height: 1.4;">
+                  Live preview from:<br>
+                  ${document.querySelector('#url').value.split('/')[2] || 'your-app.com'}
+                </div>
+              `;
+              clonedIframe.parentNode.replaceChild(placeholder, clonedIframe);
             }
-          } catch (e) {
-            console.warn('Cannot access iframe content:', e);
-            const placeholder = clonedDoc.createElement('div');
-            placeholder.style.cssText = clonedIframe.style.cssText;
-            placeholder.style.background = '#f0f0f0';
-            placeholder.style.display = 'flex';
-            placeholder.style.alignItems = 'center';
-            placeholder.style.justifyContent = 'center';
-            placeholder.innerHTML = '<div style="color: #666; text-align: center; font-family: system-ui;">Web App Content<br><small>Use extension or DevTools<br>for complete capture</small></div>';
-            clonedIframe.parentNode.replaceChild(placeholder, clonedIframe);
           }
-        }
-      },
-      scrollX: 0,
-      scrollY: 0,
-      width: wrap.offsetWidth,
-      height: wrap.offsetHeight,
-      logging: false
-    });
+        },
+        scrollX: 0,
+        scrollY: 0,
+        width: wrap.offsetWidth,
+        height: wrap.offsetHeight,
+        logging: false
+      });
 
-    console.log('Screenshot captured, creating download...');
+      console.log('Screenshot captured, processing for download...');
+
+      // Create both transparent PNG and white background versions
+      await createTransparentAndWhiteVersions(canvas);
+
+    } catch (error) {
+      console.error('Screenshot capture failed:', error);
+      alert('Screenshot capture failed. Try using the upload feature in the left panel for best results with transparent backgrounds.');
+    }
 
     // Restore original styles
     toolbar.style.display = originalToolbarDisplay;
+    capturePanel.style.display = originalCaptureDisplay;
+    toggleBtn.style.display = originalToggleDisplay;
+    outlineBtn.style.display = originalOutlineDisplay;
+    stage.style.background = originalStageBackground;
+    if (originalGuideVisibility) {
+      guide.classList.add('show');
+    }
     wrap.style.transform = originalTransform;
-
-    // Create download link
-    const link = document.createElement('a');
-    const deviceName = currentDevice.name.replace(/[^a-zA-Z0-9]/g, '_');
-    link.download = `${deviceName}_${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png', 0.9);
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
 
     downloadBtn.textContent = 'Save PNG';
     downloadBtn.disabled = false;
+  }
+
+  async function createTransparentAndWhiteVersions(canvas) {
+    const deviceName = currentDevice.name.replace(/[^a-zA-Z0-9]/g, '_');
+    const timestamp = Date.now();
     
-    alert('Screenshot saved! Note: For best results with PWA content, install the App Store Screenshot extension or use Chrome DevTools.');
+    let downloadsCompleted = 0;
+    const totalDownloads = 2;
+    
+    // Function to trigger download
+    function triggerDownload(blob, filename) {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = blobUrl;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      
+      // Force the download
+      setTimeout(() => {
+        link.click();
+        downloadsCompleted++;
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+          
+          // Show success message when both downloads complete
+          if (downloadsCompleted === totalDownloads) {
+            setTimeout(() => {
+              alert(`✅ Both files downloaded successfully!\n\n📱 Transparent PNG: ${deviceName}_transparent_${timestamp}.png\n⚪ White Background JPG: ${deviceName}_white_background_${timestamp}.jpg\n\nCheck your Downloads folder!`);
+            }, 500);
+          }
+        }, 100);
+      }, 200);
+    }
+    
+    // 1. Create and download transparent PNG version
+    canvas.toBlob(function(transparentBlob) {
+      if (!transparentBlob) {
+        console.error('Failed to create transparent PNG blob');
+        return;
+      }
+      
+      triggerDownload(transparentBlob, `${deviceName}_TRANSPARENT_${timestamp}.png`);
+      
+      // 2. Create white background version
+      setTimeout(() => {
+        const whiteCanvas = document.createElement('canvas');
+        whiteCanvas.width = canvas.width;
+        whiteCanvas.height = canvas.height;
+        const whiteCtx = whiteCanvas.getContext('2d');
+        
+        // Fill with white background first
+        whiteCtx.fillStyle = '#ffffff';
+        whiteCtx.fillRect(0, 0, whiteCanvas.width, whiteCanvas.height);
+        
+        // Draw the transparent image on top
+        whiteCtx.drawImage(canvas, 0, 0);
+        
+        // Convert to blob and download
+        whiteCanvas.toBlob(function(whiteBlob) {
+          if (!whiteBlob) {
+            console.error('Failed to create white background blob');
+            return;
+          }
+          
+          triggerDownload(whiteBlob, `${deviceName}_WHITE_BG_${timestamp}.jpg`);
+        }, 'image/jpeg', 0.95);
+        
+      }, 800); // Slightly longer delay to ensure first download starts
+      
+    }, 'image/png', 1.0);
   }
 
   function applyScale() {
@@ -506,6 +1635,11 @@
     } else {
       wrap.style.transform = 'scale(1)';
       info.textContent = `Mode: 1:1 • ${currentDevice.w}×${currentDevice.h}px • ${currentDevice.name} (may overflow)`;
+    }
+    
+    // Update guide position when scaling changes
+    if (guideVisible) {
+      setTimeout(updateGuidePosition, 100);
     }
   }
 
@@ -576,7 +1710,12 @@
 
   downloadBtn.addEventListener('click', downloadScreenshot);
 
-  window.addEventListener('resize', applyScale);
+  window.addEventListener('resize', () => {
+    applyScale();
+    if (guideVisible) {
+      updateGuidePosition();
+    }
+  });
   
   // Initialize
   updateDevice();
